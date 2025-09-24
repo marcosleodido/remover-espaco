@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Ferramentas Úteis</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .tabs {
+      display: flex;
+      background-color: orange;
+    }
+    .tabs button {
+      flex: 1;
+      padding: 15px;
+      cursor: pointer;
+      border: none;
+      background-color: orange;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .tabs button:hover {
+      background-color: darkorange;
+    }
+    .tabs button.active {
+      background-color: #ff5722;
+    }
+    .tab-content {
+      display: none;
+      padding: 20px;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Estilo Remover Pontuação */
+    .remover-container {
+      display: flex;
+      justify-content: center;
+      align-items: start;
+      gap: 20px;
+      margin-top: 30px;
+    }
+    textarea {
+      width: 250px;
+      height: 200px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .remover-container button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: orange;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .remover-container button:hover {
+      background-color: darkorange;
+    }
+
+    /* Estilo Calculadora */
+    .calc-container {
+      background: white;
+      padding: 20px;
+      width: 320px;
+      margin: 30px auto;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px #ccc;
+      text-align: center;
+    }
+    .calc-container input {
+      width: 90%;
+      padding: 8px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    .calc-container button {
+      background-color: #ff7f27;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .calc-container button:hover {
+      background-color: #ff5722;
+    }
+    .resultado {
+      margin-top: 15px;
+      font-size: 16px;
+      text-align: left;
+    }
+    .valor-dare {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #d32f2f;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Abas -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="abrirAba(event, 'remover')">Remover Pontuação</button>
+    <button class="tab-btn" onclick="abrirAba(event, 'icms')">Calculadora ICMS</button>
+    <button class="tab-btn" onclick="abrirAba(event, 'dare')">Calculadora DARE</button>
+  </div>
+
+  <!-- Conteúdo Remover Pontuação -->
+  <div id="remover" class="tab-content active">
+    <div class="remover-container">
+      <div class="container">
+        <h3>Cole os números aqui:</h3>
+        <textarea id="entrada" placeholder="Ex: 12.345-678/9"></textarea>
+        <button onclick="colarTexto()">Colar</button>
+        <button onclick="limparNumeros()">Remover Pontuação</button>
+      </div>
+  
+      <div class="container">
+        <h3>Resultado sem pontuação:</h3>
+        <textarea id="saida" readonly></textarea>
+        <button onclick="copiarResultado()">Copiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conteúdo Calculadora ICMS -->
+  <div id="icms" class="tab-content">
+    <div class="calc-container">
+      <h2>Calculadora de ICMS</h2>
+      <input type="number" id="baseICMS" placeholder="Base de ICMS" step="0.01">
+      <input type="number" id="valorICMS" placeholder="Valor do ICMS" step="0.01">
+      <button id="btnCalcularICMS">Calcular</button>
+      <div id="resultadoICMS"></div>
+    </div>
+  </div>
+
+  <!-- Conteúdo Calculadora DARE -->
+  <div id="dare" class="tab-content">
+    <div class="calc-container">
+      <h2>Calculadora DARE</h2>
+
+      <input type="number" id="produtos" placeholder="Valor dos Produtos" step="0.01">
+      <input type="number" id="ipi" placeholder="Valor do IPI" step="0.01">
+      <input type="number" id="despesas" placeholder="Outras Despesas" step="0.01">
+      <input type="number" id="iva" placeholder="IVA (%)" step="0.01">
+      <input type="number" id="aliquota" placeholder="Alíquota Interna (%)" step="0.01">
+      <input type="number" id="credito" placeholder="Crédito de ICMS" step="0.01">
+
+      <button onclick="calcularDARE()">Calcular DARE</button>
+
+      <div class="resultado" id="resultadoDARE"></div>
+      <div class="valor-dare" id="valorFinalDARE"></div>
+    </div>
+  </div>
+
+  <script>
+    // Troca de abas
+    function abrirAba(evt, abaId) {
+      const contents = document.querySelectorAll(".tab-content");
+      const buttons = document.querySelectorAll(".tab-btn");
+      contents.forEach(c => c.classList.remove("active"));
+      buttons.forEach(b => b.classList.remove("active"));
+      document.getElementById(abaId).classList.add("active");
+      evt.currentTarget.classList.add("active");
+    }
+
+    // Remover Pontuação
+    function limparNumeros() {
+      const texto = document.getElementById('entrada').value;
+      const textoLimpo = texto.replace(/[.\-\/\s]/g, '');
+      document.getElementById('saida').value = textoLimpo;
+    }
+    function copiarResultado() {
+      const saida = document.getElementById('saida');
+      saida.select();
+      document.execCommand('copy');
+      alert('Resultado copiado! 🎉');
+    }
+    async function colarTexto() {
+      try {
+        const texto = await navigator.clipboard.readText();
+        document.getElementById('entrada').value = texto;
+      } catch (err) {
+        alert('Não foi possível colar. Permita acesso à área de transferência.');
+      }
+    }
+
+    // Calculadora ICMS
+    document.getElementById('btnCalcularICMS').addEventListener('click', () => {
+      const base = parseFloat(document.getElementById('baseICMS').value);
+      const valor = parseFloat(document.getElementById('valorICMS').value);
+      const resultadoDiv = document.getElementById('resultadoICMS');
+
+      if (isNaN(base) || isNaN(valor) || base === 0) {
+        resultadoDiv.innerText = "Preencha os valores corretamente!";
+        return;
+      }
+
+      const aliquota = valor / base;
+      resultadoDiv.innerText = `Alíquota aplicada: ${(aliquota * 100).toFixed(2)}% (${aliquota.toFixed(4)})`;
+    });
+
+    // Calculadora DARE
+    function calcularDARE() {
+      let produtos = parseFloat(document.getElementById("produtos").value) || 0;
+      let ipi = parseFloat(document.getElementById("ipi").value) || 0;
+      let despesas = parseFloat(document.getElementById("despesas").value) || 0;
+      let iva = parseFloat(document.getElementById("iva").value) || 0;
+      let aliquota = parseFloat(document.getElementById("aliquota").value) || 0;
+      let credito = parseFloat(document.getElementById("credito").value) || 0;
+
+      let totalBase = produtos + ipi + despesas;
+      let valorIVA = totalBase * (iva / 100);
+      let totalComIVA = totalBase + valorIVA;
+      let icmsCheio = totalComIVA * (aliquota / 100);
+      let valorDARE = icmsCheio - credito;
+
+      document.getElementById("resultadoDARE").innerHTML = `
+        <p><b>Total Base:</b> R$ ${totalBase.toFixed(2)}</p>
+        <p><b>Valor IVA (${iva}%):</b> R$ ${valorIVA.toFixed(2)}</p>
+        <p><b>Total com IVA:</b> R$ ${totalComIVA.toFixed(2)}</p>
+        <p><b>ICMS Cheio (${aliquota}%):</b> R$ ${icmsCheio.toFixed(2)}</p>
+        <p><b>Crédito ICMS:</b> R$ ${credito.toFixed(2)}</p>
+      `;
+      document.getElementById("valorFinalDARE").innerHTML = 
+        `💰 VALOR FINAL DO DARE: <span>R$ ${valorDARE.toFixed(2)}</span>`;
+    }
+  </script>
+
+</body>
+</html>
